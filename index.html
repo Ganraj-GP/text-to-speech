@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Forum&display=swap" rel="stylesheet"> <!-- Link to Forum font -->
+    <style>
+        body {
+            height: 100vh;
+            width: 100%;
+            background-image: url(img1.png); /* Add your background image */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed; /* Fix the background */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            position: fixed; /* Fix the container in place */
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Move the container to exact center */
+            max-width: 500px; /* Set a max width for the container */
+            width: 100%; /* Full width until max width */
+            text-align: center; /* Center text */
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+            padding: 20px; /* Add some padding */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.5); /* White shadow for the container */
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-family: 'Forum', cursive; /* Apply Forum font */
+        }
+
+        textarea {
+            width: 100%; /* Full width */
+            max-width: 350px; /* Max width for the input */
+            height: 100px; /* Fixed height */
+            padding: 10px; /* Add padding */
+            border: 1px solid #ccc; /* Border */
+            border-radius: 5px; /* Rounded edges */
+            font-size: 16px; /* Font size */
+            color: white; /* Text color */
+            background-color: transparent; /* Transparent background */
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.5); /* White shadow */
+            margin: 20px auto; /* Center and space between elements */
+            display: block; /* Block element */
+            overflow: auto; /* Enable scroll */
+            resize: none; /* Prevent resizing */
+        }
+
+        select, input[type="range"], button {
+            width: 100%; /* Full width */
+            max-width: 350px; /* Max width */
+            padding: 10px; /* Add padding */
+            border: 1px solid #ccc; /* Border */
+            border-radius: 5px; /* Rounded edges */
+            font-size: 16px; /* Font size */
+            color: white; /* Text color */
+            background-color: transparent; /* Transparent background */
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.5); /* White shadow */
+            margin: 20px auto; /* Center and space between elements */
+            display: block; /* Block element */
+        }
+
+        label {
+            display: block; /* Full width */
+            margin: 20px 0; /* Add margin */
+            font-size: 16px; /* Increase font size */
+            color: white; /* Text color */
+            font-family: 'Forum', cursive; /* Apply Forum font */
+        }
+
+        button {
+            width: 100px; /* Fixed width */
+            border: 1.5px solid purple; /* Thicker border */
+            border-radius: 25px; /* Rounded edges */
+            background-color: transparent; /* Transparent background */
+            color: white;
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.5); /* White shadow */
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Light background on hover */
+            transform: scale(1.1); /* Slightly enlarge on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text to Speech</h1>
+        <textarea id="text-input" rows="4" placeholder="Enter text here..."></textarea>
+        
+        <label for="voice">Change tone of voice from here:</label>
+        <select id="voice"></select>
+        
+        <label for="rate">Speed:</label>
+        <input type="range" id="rate" min="0.5" max="2" value="1" step="0.1">
+        
+        <button id="speak-btn">Play</button>
+    </div>
+
+    <script>
+        const synth = window.speechSynthesis;
+        const textInput = document.getElementById('text-input');
+        const voiceSelect = document.getElementById('voice');
+        const rateInput = document.getElementById('rate');
+        const speakBtn = document.getElementById('speak-btn');
+
+        function populateVoices() {
+            const voices = synth.getVoices();
+            voiceSelect.innerHTML = voices.map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`).join('');
+        }
+
+        function playVoicePreview(voice) {
+            const utterance = new SpeechSynthesisUtterance("This is a preview of the selected voice.");
+            utterance.voice = voice;
+            utterance.rate = 1;
+            synth.speak(utterance);
+        }
+
+        voiceSelect.addEventListener('change', () => {
+            const selectedVoice = synth.getVoices().find(voice => voice.name === voiceSelect.value);
+            playVoicePreview(selectedVoice);
+        });
+
+        populateVoices();
+        synth.onvoiceschanged = populateVoices;
+
+        speakBtn.addEventListener('click', () => {
+            if (synth.speaking) {
+                console.error('SpeechSynthesis is already speaking.');
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(textInput.value);
+            const selectedVoice = synth.getVoices().find(voice => voice.name === voiceSelect.value);
+            utterance.voice = selectedVoice;
+            utterance.rate = rateInput.value;
+
+            // Speak the text
+            synth.speak(utterance);
+        });
+
+        textInput.focus(); // Automatically focus on the typing box when the page loads
+    </script>
+</body>
+</html>
